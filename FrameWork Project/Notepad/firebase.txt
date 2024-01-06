@@ -1,0 +1,19 @@
+Future<void> _itinerary() async {
+    final url = Uri.https(
+        'travel-planner-32bb6-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'Signup/${widget.username}/RegisteredPlace/${widget.itineraryData}.json');
+    final response = await http.post(
+      url,
+      body: json.encode(
+        {
+          'Transportation': selectedTransportation,
+          'Home': selectedHome,
+          'Activities': selectedActivities,
+        },
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      print('Failed to save data');
+    }
+  }

@@ -1,0 +1,33 @@
+my_flutter_project/
+|-- android/
+|   |-- app/
+|       |-- src/
+|           |-- main/
+|               |-- AndroidManifest.xml
+|-- ios/
+|   |-- Runner/
+|       |-- Info.plist
+|-- lib/
+|   |-- main.dart
+|   |-- src/
+|       |-- screens/
+|           |-- home_screen.dart
+|           |-- profile_screen.dart
+|       |-- widgets/
+|           |-- custom_button.dart
+|       |-- models/
+|           |-- user.dart
+|       |-- services/
+|           |-- api_service.dart
+|       |-- utils/
+|           |-- constants.dart
+|-- test/
+|   |-- widget_test.dart
+|-- assets/
+|   |-- images/
+|       |-- logo.png
+|   |-- fonts/
+|       |-- roboto_regular.ttf
+|-- pubspec.yaml
+|-- .gitignore
+|-- README.md

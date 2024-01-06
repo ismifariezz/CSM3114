@@ -1,0 +1,205 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:travel_apps/models/user.dart';
+import 'dart:convert';
+import '../widgets/drawer.dart';
+import '../widgets/date_picker.dart';
+import '../widgets/carousel_widget.dart';
+
+class RegisterScreen extends StatefulWidget {
+  final User user;
+
+  const RegisterScreen({required this.user});
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  String selectedCountry = 'Select Country'; // Default value
+  DateTime? fromDate;
+  DateTime? toDate;
+
+  // Sample images for each country
+  Map<String, List<String>> countryImages = {
+    'Malaysia': ['M1.jpg', 'M2.jpg', 'M3.jpg'],
+    'China': ['C1.jpg', 'C2.jpg', 'C3.jpg'],
+    'India': ['I1.jpg', 'I2.jpg', 'I3.jpg'],
+    // Add more countries as needed
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.green[100],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Register Place ${widget.user.username}',
+          style: TextStyle(color: Colors.green),
+        ),
+      ),
+      body:
+          // Main Content
+          Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 80),
+            Text(
+              'Register Country',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            SizedBox(height: 16),
+            CountryCarousel(
+              selectedCountry: selectedCountry,
+              images: countryImages[selectedCountry],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(),
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                    child: DropdownButton<String>(
+                      value: selectedCountry,
+                      icon: Icon(Icons.arrow_drop_down),
+                      iconSize: 24,
+                      elevation: 16,
+                      isExpanded: true,
+                      style: TextStyle(color: Colors.black),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedCountry = newValue!;
+                        });
+                      },
+                      items: <String>[
+                        'Select Country',
+                        'Malaysia',
+                        'China',
+                        'India',
+                        // Add more countries as needed
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      DatePickerWidget(
+                        hintText: 'From',
+                        selectedDate: fromDate,
+                        onDateSelected: (date) {
+                          setState(() {
+                            fromDate = date;
+                          });
+                        },
+                      ),
+                      SizedBox(width: 16),
+                      DatePickerWidget(
+                        hintText: 'To',
+                        selectedDate: toDate,
+                        onDateSelected: (date) {
+                          setState(() {
+                            toDate = date;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                _place();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Place has been Registered')),
+                );
+              },
+              child: Container(
+                padding: EdgeInsets.all(25),
+                margin: const EdgeInsets.symmetric(horizontal: 25),
+                decoration: BoxDecoration(
+                  color: Colors.green[700], // Dark green button color
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Submit",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            Text('Country: $selectedCountry'),
+            SizedBox(height: 5),
+            Text('From ${_formatDate(fromDate)} to ${_formatDate(toDate)}'),
+          ],
+        ),
+      ),
+      drawer: CustomDrawer(),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) {
+      return 'Select Date';
+    }
+    return '${date.day} ${_getMonthName(date.month)} ${date.year}';
+  }
+
+  String _getMonthName(int month) {
+    const List<String> months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
+  }
+
+  Future<void> _place() async {
+    final url = Uri.https(
+        'travel-planner-32bb6-default-rtdb.asia-southeast1.firebasedatabase.app',
+        'RegisteredPlace/${widget.user.username}.json');
+    final response = await http.post(
+      url,
+      body: json.encode(
+        {
+          'Country': selectedCountry,
+          'FromDate': _formatDate(fromDate),
+          'ToDate': _formatDate(toDate),
+        },
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      print('Failed to save data');
+      // Handle error as needed
+    }
+  }
+}
